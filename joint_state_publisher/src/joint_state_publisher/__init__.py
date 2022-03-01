@@ -38,6 +38,8 @@ import rospy
 import sensor_msgs.msg
 
 
+from liftbot.srv import Joint2Angle
+
 def get_param(name, value=None):
     private = "~%s" % name
     if rospy.has_param(private):
@@ -84,6 +86,9 @@ class JointStatePublisher():
                 if jtype in ['fixed', 'floating', 'planar']:
                     continue
                 name = child.getAttribute('name')
+                if len(self.joint_list_config) > 0 and name not in self.joint_list_config:
+                    rospy.loginfo("Excluding joint %s", name)
+                    continue
                 self.joint_list.append(name)
                 if jtype == 'continuous':
                     minval = -math.pi
@@ -120,12 +125,12 @@ class JointStatePublisher():
                 if name in self.dependent_joints:
                     continue
 
-                zeroval = get_param("zeros/" + name)
-                if not zeroval:
-                    if minval > 0 or maxval < 0:
-                        zeroval = (maxval + minval)/2
-                    else:
-                        zeroval = 0
+                if self.zeros and name in self.zeros:
+                    zeroval = self.zeros[name]
+                elif minval > 0 or maxval < 0:
+                    zeroval = (maxval + minval)/2
+                else:
+                    zeroval = 0
 
                 joint = {'min': minval, 'max': maxval, 'zero': zeroval}
                 if self.pub_def_positions:
@@ -150,6 +155,10 @@ class JointStatePublisher():
         self.use_mimic = get_param('use_mimic_tags', True)
         self.use_small = get_param('use_smallest_joint_limits', True)
 
+        self.joint_list_config = get_param('joint_list', [])
+        print("param:", self.joint_list_config)
+
+        self.zeros = get_param("zeros")
 
         self.pub_def_positions = get_param("publish_default_positions", True)
         self.pub_def_vels = get_param("publish_default_velocities", False)
@@ -172,6 +181,11 @@ class JointStatePublisher():
             self.sources.append(rospy.Subscriber(source, sensor_msgs.msg.JointState, self.source_cb))
 
         self.pub = rospy.Publisher('joint_states', sensor_msgs.msg.JointState, queue_size=5)
+
+
+        rospy.wait_for_service('calculate_joint_2_angle')
+        self.joint_2_service = rospy.ServiceProxy('calculate_joint_2_angle', Joint2Angle)
+
 
     def source_cb(self, msg):
         for i in range(len(msg.name)):
@@ -268,6 +282,17 @@ class JointStatePublisher():
                         offset += factor * param.get('offset', 0)
                         factor *= param.get('factor', 1)
                     joint = self.free_joints[parent]
+
+
+                if name == "joint_2":
+                    print("Calling service...................................")
+                    req = Joint2Angle._request_class()
+                    req.joint_1 = msg.position[1]
+                    resp = self.joint_2_service(req)
+                    msg.position[2] = resp.joint_2
+                    print(resp.joint_2)
+                    continue
+                    
 
                 if has_position and 'position' in joint:
                     msg.position[i] = joint['position'] * factor + offset

@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(joint_state_publisher_gui)
 
-find_package(catkin REQUIRED)
-catkin_package()
+#find_package(catkin REQUIRED COMPONENTS
+#    liftbot
+#        )
+
+
+catkin_package(
+
+)
 
 catkin_python_setup()
 

@@ -18,6 +18,8 @@
 
   <exec_depend>rospy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
+  <build_depend>liftbot</build_depend>
+  <exec_depend>liftbot</exec_depend>
 
   <test_depend>rostest</test_depend>
 </package>
