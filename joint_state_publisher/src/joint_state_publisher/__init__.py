@@ -285,12 +285,12 @@ class JointStatePublisher():
 
 
                 if name == "joint_2":
-                    print("Calling service...................................")
+                    # print("Calling service...................................")
                     req = Joint2Angle._request_class()
                     req.joint_1 = msg.position[1]
                     resp = self.joint_2_service(req)
                     msg.position[2] = resp.joint_2
-                    print(resp.joint_2)
+                    # print(resp.joint_2)
                     continue
                     
 
