@@ -38,7 +38,7 @@ import rospy
 import sensor_msgs.msg
 
 
-from liftbot.srv import Joint2Angle
+from liftbot.srv import Joint3Angle
 
 def get_param(name, value=None):
     private = "~%s" % name
@@ -183,8 +183,8 @@ class JointStatePublisher():
         self.pub = rospy.Publisher('joint_states', sensor_msgs.msg.JointState, queue_size=5)
 
 
-        rospy.wait_for_service('calculate_joint_2_angle')
-        self.joint_2_service = rospy.ServiceProxy('calculate_joint_2_angle', Joint2Angle)
+        rospy.wait_for_service('calculate_joint_3_angle')
+        self.joint_3_service = rospy.ServiceProxy('calculate_joint_3_angle', Joint3Angle)
 
 
     def source_cb(self, msg):
@@ -284,12 +284,13 @@ class JointStatePublisher():
                     joint = self.free_joints[parent]
 
 
-                if name == "joint_2":
+                if name == "joint_3":
                     # print("Calling service...................................")
-                    req = Joint2Angle._request_class()
+                    req = Joint3Angle._request_class()
                     req.joint_1 = msg.position[1]
-                    resp = self.joint_2_service(req)
-                    msg.position[2] = resp.joint_2
+                    resp = self.joint_3_service(req)
+                    msg.position[3] = resp.joint_3
+                    self.free_joints['joint_3']['position'] = resp.joint_3
                     # print(resp.joint_2)
                     continue
                     

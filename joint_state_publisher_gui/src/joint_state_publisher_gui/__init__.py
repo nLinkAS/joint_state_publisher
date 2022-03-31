@@ -51,13 +51,13 @@ from python_qt_binding.QtWidgets import QScrollArea
 from python_qt_binding.QtWidgets import QSpinBox
 from python_qt_binding.QtWidgets import QWidget
 
-from liftbot.srv import Joint2Angle
+from liftbot.srv import Joint3Angle
 
 RANGE = 10000
 
 
 
-joint_2_service = rospy.ServiceProxy('calculate_joint_2_angle', Joint2Angle)
+joint_3_service = rospy.ServiceProxy('calculate_joint_3_angle', Joint3Angle)
 
 class JointStatePublisherGui(QWidget):
     sliderUpdateTrigger = Signal()
@@ -114,7 +114,7 @@ class JointStatePublisherGui(QWidget):
             # Connect to the signal provided by QSignal
             slider.valueChanged.connect(lambda event,name=name: self.onValueChangedOne(name))
 
-            if name != "joint_2":
+            if name != "joint_3":
                 sliders.append(joint_layout)
 
         # Determine number of rows to be used in grid
